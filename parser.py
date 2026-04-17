@@ -43,6 +43,12 @@ MENSAJES_SISTEMA = [
     "salió",
     "was added",
     "fue añadido",
+    "creó el grupo",
+    "cambió el ícono",
+    "te añadió a un grupo",
+    "cambió la descripción",
+    "cambió el nombre del grupo",
+    "eliminó a",
 ]
 
 MEDIA_OMITIDA = [
@@ -52,6 +58,15 @@ MEDIA_OMITIDA = [
     "video omitted",
     "audio omitted",
     "sticker omitted",
+    "multimedia",
+    "omitido",
+    "de",
+    "que",
+    "no",
+    "la",
+    "el",
+    "si",
+    "no",
 ]
 
 
@@ -224,11 +239,11 @@ if __name__ == "__main__":
     ruta_archivo = " ".join(sys.argv[1:])
     resultado = parsear_chat(ruta_archivo)
 
-    print(f"Chat type      : {resultado['tipo_chat']}")
-    print(f"Participants   : {resultado['participantes']}")
-    print(f"Total messages : {resultado['total_mensajes']}")
+    print(f"Chat type: {resultado['tipo_chat']}")
+    print(f"Participants: {resultado['participantes']}")
+    print(f"Total messages: {resultado['total_mensajes']}")
     print(
-        f"Date range     : {resultado['rango_fechas'][0]} -> {resultado['rango_fechas'][1]}"
+        f"Date range: {resultado['rango_fechas'][0]} -> {resultado['rango_fechas'][1]}"
     )
     print()
     print(resultado["mensajes"].head(10).to_string())
