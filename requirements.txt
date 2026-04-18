@@ -1,0 +1,9 @@
+flask>=3.0.0
+pandas>=2.2.0
+numpy>=1.26.0
+spacy>=3.7.0
+langdetect>=1.0.9
+vaderSentiment>=3.3.2
+pysentimiento>=0.7.0
+plotly>=5.20.0
+gunicorn>=21.2.0
