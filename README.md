@@ -1,13 +1,14 @@
 ---
 title: Avvolto
 emoji: 💬
-colorFrom: orange
+colorFrom: red
 colorTo: pink
 sdk: docker
 pinned: false
 ---
  
 # Avvolto — Your Chat Wrapped
+  
  
 WhatsApp chat analyzer. Upload a `.txt` export and get your personalized chat analytics.
  

@@ -25,7 +25,7 @@ dropZone.addEventListener('drop', e => {
     if (file) uploadFile(file);
 });
 
-const API_URL = 'https://TU_USUARIO-avvolto.hf.space';
+const API_URL = 'https://jdhva-avvolto.hf.space';
 
 async function uploadFile(file) {
     if (!file.name.endsWith('.txt')) {
