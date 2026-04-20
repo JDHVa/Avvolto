@@ -1,3 +1,16 @@
+---
+title: Avvolto
+emoji: 💬
+colorFrom: orange
+colorTo: pink
+sdk: docker
+pinned: false
+---
+ 
+# Avvolto — Your Chat Wrapped
+ 
+WhatsApp chat analyzer. Upload a `.txt` export and get your personalized chat analytics.
+ 
 Kreslit:
 ![IMG](media/kreslit-v1.png)
 
