@@ -1,5 +1,12 @@
 import re
 from collections import Counter
+
+import os
+import warnings
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+warnings.filterwarnings("ignore")
 import spacy
 from langdetect import detect, LangDetectException
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -42,8 +49,9 @@ def cargar_pysentimiento(idioma: str):
             analizador_pysentimiento[idioma] = create_analyzer(
                 task="sentiment", lang=idioma
             )
-        except:
-            print(f"[nlp] pysentimiento could not found '{idioma}")
+        except Exception as e:
+            print(f"[nlp] pysentimiento could not load for '{idioma}': {e}")
+            analizador_pysentimiento[idioma] = None
 
     return analizador_pysentimiento[idioma]
 
@@ -68,64 +76,12 @@ def detectar_idioma_chat(df) -> str:
 
 STOPWORDS_EXTRA = {
     "en": {
-        "ok",
-        "okay",
-        "yeah",
-        "yep",
-        "nope",
-        "gonna",
-        "wanna",
-        "gotta",
-        "lol",
-        "lmao",
-        "haha",
-        "hahaha",
-        "omg",
-        "wtf",
-        "idk",
-        "imo",
-        "btw",
-        "tbh",
-        "ngl",
-        "fr",
-        "bro",
         "dude",
         "yo",
         "hey",
     },
     "es": {
         "ok",
-        "si",
-        "no",
-        "ya",
-        "pues",
-        "bueno",
-        "vale",
-        "claro",
-        "oye",
-        "ahi",
-        "aca",
-        "alla",
-        "jaja",
-        "jajaja",
-        "jajajaja",
-        "xd",
-        "ajá",
-        "mhm",
-        "aja",
-        "wey",
-        "güey",
-        "bro",
-        "ps",
-        "pos",
-        "ntp",
-        "neta",
-        "o sea",
-        "nd",
-        "nel",
-        "simon",
-        "simón",
-        "sale",
     },
 }
 
@@ -225,24 +181,75 @@ def analizar_sentimiento(texto: str, idioma: str = "en") -> dict:
     return sentimiento_en(texto) if idioma == "en" else sentimiento_es(texto)
 
 
+def sentimiento_es_batch(textos: list[str]) -> list[dict]:
+    """Score a batch of Spanish texts with pysentimiento in one call."""
+    analizador = cargar_pysentimiento("es")
+    if analizador is None:
+        return [
+            {"positivo": 0.0, "negativo": 0.0, "neutro": 1.0, "compuesto": 0.0}
+        ] * len(textos)
+    resultados = []
+    try:
+        for resultado in analizador.predict(textos):
+            probas = resultado.probas
+            compuesto = probas.get("POS", 0) - probas.get("NEG", 0)
+            resultados.append(
+                {
+                    "positivo": probas.get("POS", 0.0),
+                    "negativo": probas.get("NEG", 0.0),
+                    "neutro": probas.get("NEU", 0.0),
+                    "compuesto": round(compuesto, 4),
+                }
+            )
+    except Exception:
+        resultados = [
+            {"positivo": 0.0, "negativo": 0.0, "neutro": 1.0, "compuesto": 0.0}
+        ] * len(textos)
+    return resultados
+
+
 def sentimiento_por_participante(df, idioma: str = "en") -> dict[str, dict]:
+    MAX_MUESTRA = 150
     resultado = {}
     subset = df[~df["es_media"] & (df["num_palabras"] >= 2)]
 
     for autor in subset["autor"].unique():
+        serie = subset[subset["autor"] == autor]["contenido"]
+
+        if len(serie) > MAX_MUESTRA:
+            serie = serie.sample(MAX_MUESTRA, random_state=42)
+
+        textos = [limpiar_texto(t) for t in serie.tolist()]
+        textos = [t for t in textos if t]
+        if not textos:
+            continue
+        if idioma == "es":
+            scores = sentimiento_es_batch(textos)
+        else:
+            scores = [sentimiento_en(t) for t in textos]
+
+        if not scores:
+            continue
+
         mensaje_autor = subset[subset["autor"] == autor]["contenido"].tolist()
         scores = [analizar_sentimiento(t, idioma=idioma) for t in mensaje_autor]
         if not scores:
             continue
         promedio_compuesto = sum(s["compuesto"] for s in scores) / len(scores)
-        positivos = sum(1 for s in scores if s["compuesto"] >= 0.045)
-        negativos = sum(1 for s in scores if s["compuesto"] <= -0.045)
+        positivos = sum(
+            1 for s in scores if s["positivo"] >= max(s["negativo"], s["neutro"])
+        )
+        negativos = sum(
+            1 for s in scores if s["negativo"] >= max(s["positivo"], s["neutro"])
+        )
         neutros = len(scores) - positivos - negativos
         total = len(scores)
-
-        if promedio_compuesto >= 0.045:
+        pos_pct = positivos / total
+        neg_pct = negativos / total
+        neu_pct = neutros / total
+        if pos_pct > neu_pct and pos_pct > neg_pct and pos_pct > 0.35:
             tono = "positive"
-        elif promedio_compuesto <= -0.045:
+        elif neg_pct > neu_pct and neg_pct > pos_pct and neg_pct > 0.35:
             tono = "negative"
         else:
             tono = "neutral"

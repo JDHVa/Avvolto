@@ -19,7 +19,11 @@ PATRONES_FECHA = [
     # iOS 12h ES          ->  [11/3/2026, 8:53:00 p. m.]
     "^\[(\d{1,2}[\\/\\.]\d{1,2}[\\/\\.]\d{2,4}),\\s(\d{1,2}:\d{2}:\d{2}\u202f[ap]\\.\u202fm\\.)\]\s",
 ]
-
+AUTORES_IGNORADOS = {
+    "meta ai",
+    "meta ia",
+    "meta",
+}
 MENSAJES_SISTEMA = [
     "messages and calls are end-to-end encrypted",
     "los mensajes y llamadas están cifrados",
@@ -167,6 +171,8 @@ def parsear_chat(ruta: str | Path) -> dict:
     def guardar_registro():
         """Flush the current buffered message into registros."""
         if autor_actual and fecha_actual and contenido_actual:
+            if autor_actual.lower().strip() in AUTORES_IGNORADOS:
+                return
             contenido = " ".join(contenido_actual).strip()
             if not es_mensaje_sistema(contenido):
                 registros.append(

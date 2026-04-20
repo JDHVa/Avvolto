@@ -160,45 +160,58 @@ def detectar_personalidad(
         scores = {}
 
         if mediana_respuesta and fila["promedio_respuesta"] is not None:
-            ratio_respusta = fila["promedio_respuesta"] / mediana_respuesta
-            if ratio_respusta < 0.4:
-                scores["el_rapido"] = 3
-            elif ratio_respusta > 3.0:
-                scores["el_fantasma"] = 3
+            ratio_respuesta = fila["promedio_respuesta"] / mediana_respuesta
+            if ratio_respuesta < 0.5:
+                scores["el_rapido"] = 3 + max(0, (0.5 - ratio_respuesta) * 4)
+            elif ratio_respuesta > 2.0:
+                scores["el_fantasma"] = 3 + min(3, ratio_respuesta - 2.0)
 
         if mediana_palabras > 0:
             ratio_palabras = fila["promedio_palabras"] / mediana_palabras
-            if ratio_palabras > 1.8:
-                scores["el_novelista"] = 2
-            elif ratio_palabras < 0.4:
-                scores["el_lacónico"] = 2
+            if ratio_palabras > 1.3:
+                scores["el_novelista"] = 1 + (ratio_palabras - 1.3) * 2
+            elif ratio_palabras < 0.75:
+                scores["el_lacónico"] = 1 + (0.75 - ratio_palabras) * 2
 
         if fila["total_mensajes"] > 0:
             ratio_emojis = fila["total_emojis"] / fila["total_mensajes"]
-            if ratio_emojis > 1.5:
-                scores["el_comediante"] = 2
+            if ratio_emojis > 0.5:
+                scores["el_comico"] = 1 + ratio_emojis
 
         mensajes_autor = df[df["autor"] == autor]
         if not mensajes_autor.empty:
             hora_pico = mensajes_autor["hora"].value_counts().idxmax()
             bloques = mensajes_autor["hora_bloque"].value_counts(normalize=True)
-            if bloques.get("laten_night", 0) > 0.3:
-                scores["el_noctambulo"] = 2
-            elif bloques.get("morning", 0) > 0.3 and hora_pico < 9:
-                scores["el_madrugador"] = 2
+            late = bloques.get("late_night", 0)
+            morning = bloques.get("morning", 0)
+            if late > 0.15:
+                scores["el_noctambulo"] = 1 + late * 4
+            if morning > 0.25 and hora_pico < 10:
+                scores["el_madrugador"] = 1 + morning * 3
 
         if autor in autores_inicio.index:
             proporcion_inicios = autores_inicio[autor] / len(inicios)
-            if proporcion_inicios > 0.4:
-                scores["el_iniciador"] = 2
+            if proporcion_inicios > 0.25:
+                scores["el_iniciador"] = 1 + proporcion_inicios * 3
 
-        if fila["porcentaje_mensajes"] < 5:
-            scores["el_silencioso"] = 1
+        if fila["porcentaje_mensajes"] < 8:
+            scores["el_silencioso"] = 1 + (8 - fila["porcentaje_mensajes"]) * 0.2
 
         if scores:
             clave = max(scores, key=scores.get)
         else:
-            clave = "el_lacónico"
+            mensajes_a = df[df["autor"] == autor]
+            hora_p = (
+                mensajes_a["hora"].value_counts().idxmax()
+                if not mensajes_a.empty
+                else 12
+            )
+            if hora_p >= 22 or hora_p <= 5:
+                clave = "el_noctambulo"
+            elif fila["promedio_palabras"] >= mediana_palabras:
+                clave = "el_novelista"
+            else:
+                clave = "el_lacónico"
 
         personalidad_asignada[autor] = {
             "clave": clave,
@@ -303,17 +316,17 @@ if __name__ == "__main__":
     resultado_parser = parsear_chat(ruta)
     resultado = analizar(resultado_parser)
 
-    print(f"\n=== STATS PER PARTICIPANT ===")
+    print(f"\nStats per participant")
     print(resultado["stats"].to_string())
 
-    print(f"\n=== PERSONALITIES ===")
+    print(f"\nPersonalities")
     for autor, info in resultado["personalidades"].items():
         print(f"  {autor:30s} -> {info['etiqueta']}")
 
-    print(f"\n=== TOP 10 WORDS ===")
+    print(f"\nTop 10 words")
     for palabra, count in resultado["palabras_top"][:10]:
         print(f"  {palabra:20s} {count}")
 
-    print(f"\n=== TOP EMOJIS ===")
+    print(f"\nTop emojis")
     for emoji, count in resultado["emojis_top"]:
         print(f"  {emoji}  {count}")
