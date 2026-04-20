@@ -22,11 +22,18 @@ Upload a `.txt` exported from WhatsApp and get:
 
 I made almost all the work here but here is the list that i do, and the list that the AI do
 
-## Me
-- All the logic behind all the project all the python files, and the js files
+## What I built
 
-## AI
-- All the design, and files to publish on HF, also help me a bit with the readme.md, specificly with the test mode, beacause when i start making the readme.md idk, how to make the "cubes", in that side so i ask gemini to help me
+- All the parsing logic to handle every WhatsApp export format (Android, iOS, 12h/24h, Spanish/English locale, narrow no-break spaces, Meta AI filtering)
+- The full NLP pipeline — language detection, stopword filtering, lemmatization, sentiment scoring
+- The personality detection system with weighted scoring across 9 archetypes
+- The Plotly chart generation pipeline
+
+## What AI do
+
+- I entirely make with gemini because im running out of time 
+- The how to run in your own device
+
 ---
 
 ## How to export your WhatsApp chat
@@ -102,16 +109,6 @@ http://localhost:7860
 ```
 
 Then upload any WhatsApp `.txt` export and get your results.
-
----
-
-## What I built
-
-- All the parsing logic to handle every WhatsApp export format (Android, iOS, 12h/24h, Spanish/English locale, narrow no-break spaces, Meta AI filtering)
-- The full NLP pipeline — language detection, stopword filtering, lemmatization, sentiment scoring
-- The personality detection system with weighted scoring across 9 archetypes
-- The Plotly chart generation pipeline
-- The frontend design — dark warm aesthetic with glassmorphism cards
 
 ---
 
