@@ -84,7 +84,7 @@ I made almost all the work here but here is the list that i do, and the list tha
 **1. Clone the repo**
 
 ```bash
-git clone https://github.com/TU_USUARIO/avvolto.git
+git clone https://github.com/JDHVa/avvolto.git
 cd avvolto
 ```
 
