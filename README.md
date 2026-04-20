@@ -1,4 +1,4 @@
-# Avvolto 💬
+# Avvolto 
 
 **Your WhatsApp chat, wrapped.**
 
@@ -18,6 +18,15 @@ Upload a `.txt` exported from WhatsApp and get:
 - **Response time** — median response time per participant
 - **Message share** — who talks the most
 
+## AI Declaration
+
+I made almost all the work here but here is the list that i do, and the list that the AI do
+
+## Me
+- All the logic behind all the project all the python files, and the js files
+
+## AI
+- All the design, and files to publish on HF, also help me a bit with the readme.md
 ---
 
 ## How to export your WhatsApp chat
