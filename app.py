@@ -5,8 +5,8 @@ import tempfile
 from pathlib import Path
 
 import numpy as np
-from flask import Flask, request, jsonify, render_template
-from flask import current_app
+from flask import Flask, request, jsonify, render_template, Response
+from flask_cors import CORS
 
 from parser import parsear_chat
 from analyzer import analizar
@@ -15,7 +15,6 @@ from visualizer import generar_graficas
 
 
 def _sanitizar(obj):
-    """Recursively convert numpy/date types to JSON-safe Python natives."""
     if isinstance(obj, dict):
         return {k: _sanitizar(v) for k, v in obj.items()}
     if isinstance(obj, list):
@@ -32,23 +31,15 @@ def _sanitizar(obj):
     return obj
 
 
-# ---------------------------------------------------------------------------
-# App setup
-# ---------------------------------------------------------------------------
-
 app = Flask(__name__)
+CORS(app)
 
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB max upload
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 EXTENSIONES_PERMITIDAS = {".txt"}
 
 
-def _extension_valida(nombre: str) -> bool:
+def extension_valida(nombre: str) -> bool:
     return Path(nombre).suffix.lower() in EXTENSIONES_PERMITIDAS
-
-
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
 
 
 @app.route("/")
@@ -58,10 +49,6 @@ def index():
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    """
-    Receives a .txt file upload, runs the full pipeline, and returns JSON
-    with all stats, personalities, and chart data.
-    """
     if "file" not in request.files:
         return jsonify({"error": "No file provided."}), 400
 
@@ -70,13 +57,12 @@ def analyze():
     if archivo.filename == "":
         return jsonify({"error": "No file selected."}), 400
 
-    if not _extension_valida(archivo.filename):
+    if not extension_valida(archivo.filename):
         return (
             jsonify({"error": "Only .txt files exported from WhatsApp are supported."}),
             400,
         )
 
-    # Save to a temp file so all modules can read it normally
     with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tmp:
         archivo.save(tmp.name)
         ruta_tmp = tmp.name
@@ -88,7 +74,6 @@ def analyze():
         resultado_nlp = analizar_nlp(resultado_anl["mensajes"], resultado_anl)
         graficas = generar_graficas(resultado_anl, resultado_nlp)
 
-        # --- Build response payload ---
         stats_json = resultado_anl["stats"].to_dict(orient="records")
 
         fecha_inicio, fecha_fin = resultado_anl["rango_fechas"]
@@ -123,16 +108,11 @@ def analyze():
         )
 
     finally:
-        # Always clean up the temp file
         try:
             os.unlink(ruta_tmp)
         except OSError:
             pass
 
-
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

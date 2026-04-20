@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: avvolto-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm && python -m spacy download es_core_news_sm
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1
+    envVars:
+      - key: FLASK_DEBUG
+        value: false
+      - key: HF_HUB_DISABLE_PROGRESS_BARS
+        value: "1"
+      - key: TOKENIZERS_PARALLELISM
+        value: "false"

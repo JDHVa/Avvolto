@@ -7,3 +7,4 @@ vaderSentiment>=3.3.2
 pysentimiento>=0.7.0
 plotly>=5.20.0
 gunicorn>=21.2.0
+flask-cors

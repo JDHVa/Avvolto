@@ -5,20 +5,20 @@ import pandas as pd
 import json
 
 Colores = [
-    "#00F5FF",
-    "#BF5FFF",
-    "#00FF9F",
-    "#FF6B6B",
-    "#FFD93D",
-    "#FF8E53",
-    "#4ECDC4",
-    "#A8FF78",
+    "#E8936A",
+    "#C97B8A",
+    "#7BA99A",
+    "#7A9EBD",
+    "#C9A84C",
+    "#A07858",
+    "#9B8AAA",
+    "#6B9E8F",
 ]
 
-fondo = "#050510"
-fondo_panel = "rgba(255,255,255,0.04)"
-color_texto = "#E0E0FF"
-color_grid = "rgba(255,255,255,0.07)"
+fondo = "#0E0C0F"
+fondo_panel = "rgba(255,255,255,0.03)"
+color_texto = "#EDE8E3"
+color_grid = "rgba(255,255,255,0.06)"
 fuente = "Space Grotesk, sans-serif"
 
 layout = dict(

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avvolto - Your Whatsapp Stats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+
+    <div id="screen-upload" class="screen">
+        <div style="width:100%; max-width:520px; display:flex; flex-direction:column; align-items:center;">
+
+            <div class="logo">avvolto</div>
+                <p class="logo-sub">Your chat, Stats</p>
+
+                <div class="upload-card" id="drop-zone">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+
+                <h2>Drop your chat here</h2>
+                <p>Upload a <span>.txt</span> exported from WhatsApp and get your personalized chat analytics — Spotify Wrapped style.</p>
+
+                <input type="file" id="file-input" accept=".txt" />
+                <button class="btn-upload" onclick="document.getElementById('file-input').click()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Choose file
+                </button>
+
+                <p class="upload-hint">Max 10 MB &nbsp;·&nbsp; Individual or group chats</p>
+            </div>
+
+            <div class="how-to">
+                <h3>How to export your chat</h3>
+                <div class="steps">
+                        <div class="step">
+                            <span class="step-num">01</span>
+                            <p>Open WhatsApp and go to the chat you want to analyze.</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-num">02</span>
+                            <p>Tap the <strong>three dots menu</strong> → <strong>More</strong> → <strong>Export chat</strong>.</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-num">03</span>
+                            <p>Choose <strong>Without media</strong> and save the <strong>.txt</strong> file.</p>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="screen-loading" class="screen hidden">
+        <div class="loader-ring"></div>
+        <div class="loading-text">
+            <strong>Analyzing your chat</strong>
+            <span>Running NLP pipeline - it may take a while like 3-4 min<span class="loading-dots"></span></span>
+        </div>
+    </div>
+
+    <div id="screen-error" class="screen hidden">
+        <div class="error-icon">⚠</div>
+        <p id="error-message">Something went wrong.</p>
+        <button class="btn-retry" onclick="showScreen('upload')">Try again</button>
+    </div>
+
+    <div id="screen-results" class="screen hidden">
+        <div class="results-inner">
+
+            <div class="results-header"><div>
+                <div class="results-title">Chat<br>Wrapped.</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
+                <div class="results-meta">
+                    <span id="res-dates"></span>
+                    <span id="res-type"></span>
+                    <span id="res-lang"></span>
+                </div>
+                <button class="btn-new" onclick="showScreen('upload')">+ Analyze another</button>
+            </div>
+            </div>
+
+            <div class="stats-row" id="stats-row"></div>
+
+                <div class="section-title">Personalities</div>
+                <div class="personalities-grid" id="personalities-grid"></div>
+
+                <div class="section-title">Overview</div>
+                <div class="charts-grid">
+                <div class="chart-card col-5 delay-1"><div id="chart-participacion"></div></div>
+                <div class="chart-card col-7 delay-2"><div id="chart-timeline"></div></div>
+            </div>
+
+            <div class="section-title">When you chat</div>
+                <div class="charts-grid">
+                <div class="chart-card col-7 delay-1"><div id="chart-horas"></div></div>
+                <div class="chart-card col-5 delay-2"><div id="chart-semana"></div></div>
+            </div>
+
+            <div class="section-title">Communication Style</div>
+                <div class="charts-grid">
+                <div class="chart-card col-6 delay-1"><div id="chart-respuesta"></div></div>
+                <div class="chart-card col-6 delay-2"><div id="chart-longitud"></div></div>
+            </div>
+
+            <div class="section-title">Vibes & Emojis</div>
+                <div class="charts-grid">
+                <div class="chart-card col-7 delay-1"><div id="chart-sentimiento"></div></div>
+                <div class="chart-card col-5 delay-2"><div id="chart-emojis"></div></div>
+            </div>
+
+            <div class="section-title">Top Words</div>
+                <div class="charts-grid">
+                <div class="chart-card col-12"><div id="chart-palabras"></div></div>
+            </div>
+
+            <div class="section-title">Words by Person</div>
+            <div class="author-words-grid" id="author-words-grid"></div>
+
+        </div>
+    </div>
+<script src="app.js"></script>
+
+</body>
+</html>
