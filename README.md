@@ -26,7 +26,7 @@ I made almost all the work here but here is the list that i do, and the list tha
 - All the logic behind all the project all the python files, and the js files
 
 ## AI
-- All the design, and files to publish on HF, also help me a bit with the readme.md
+- All the design, and files to publish on HF, also help me a bit with the readme.md, specificly with the test mode, beacause when i start making the readme.md idk, how to make the "cubes", in that side so i ask gemini to help me
 ---
 
 ## How to export your WhatsApp chat
